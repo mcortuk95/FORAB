@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FORAB Tokatlama</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700;800&family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+  <!-- React & Babel Standalone -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; user-select: none; }
+    .font-poster { font-family: 'Playfair Display', serif; }
+    .font-fredoka { font-family: 'Fredoka', sans-serif; }
+  </style>
+</head>
+<body class="bg-stone-100 min-h-screen flex items-center justify-center p-3 sm:p-6">
+  <div id="root" class="w-full flex justify-center"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const STAGES = [
+      { badge: '🍼 Minik Süt Kuzusu (1-2 Ay)' },
+      { badge: '🧶 Meraklı Yumak (3-6 Ay)' },
+      { badge: '🐾 Genç Afacan (7-12 Ay)' },
+      { badge: '👑 Asil Yetişkin (1-3 Yaş)' },
+      { badge: '🦁 Pofuduk Kral (3+ Yaş)' }
+    ];
+
+    const DEFAULT_FRIENDS = [
+      { id: 1, name: 'Alper', preset: '1', photo: '', slaps: 0, tilt: 0, slapped: false },
+      { id: 2, name: 'Mehmet', preset: '2', photo: '', slaps: 0, tilt: 0, slapped: false },
+      { id: 3, name: 'Ayşe', preset: '3', photo: '', slaps: 0, tilt: 0, slapped: false },
+      { id: 4, name: 'Zeynep', preset: '4', photo: '', slaps: 0, tilt: 0, slapped: false },
+      { id: 5, name: 'Can', preset: '5', photo: '', slaps: 0, tilt: 0, slapped: false }
+    ];
+
+    const DEFAULT_KITTENS = [
+      { id: 1, color: 'orange', food: 0, stage: 0 },
+      { id: 2, color: 'white', food: 0, stage: 0 },
+      { id: 3, color: 'black', food: 0, stage: 0 },
+      { id: 4, color: 'grey', food: 0, stage: 0 },
+      { id: 5, color: 'calico', food: 0, stage: 0 }
+    ];
+
+    function Avatar({ preset, photo, isSlapped, tilt }) {
+      if (photo && photo.length > 0) {
+        return (
+          <div
+            className="w-full h-full rounded-2xl overflow-hidden bg-stone-100 transition-transform duration-200"
+            style={{ transform: isSlapped ? `rotate(${tilt}deg) scale(0.88)` : 'rotate(0deg) scale(1)' }}
+          >
+            <img src={photo} alt="Fotoğraf" className="w-full h-full object-cover" />
+            {isSlapped && <div className="absolute inset-0 bg-red-500/30 flex items-center justify-center"><span className="text-3xl">💥</span></div>}
+          </div>
+        );
+      }
+
+      return (
+        <div
+          className="w-full h-full flex items-center justify-center transition-transform duration-200"
+          style={{ transform: isSlapped ? `rotate(${tilt}deg) scale(0.9)` : 'rotate(0deg) scale(1)' }}
+        >
+          <svg viewBox="0 0 100 100" className="w-full h-full">
+            <circle cx="50" cy="50" r="46" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="2.5" />
+            {preset === '1' && (
+              <g>
+                <path d="M14 94 C 18 72, 82 72, 86 94 Z" fill="#18181b" />
+                <polygon points="50,66 38,94 62,94" fill="#ffffff" />
+                <circle cx="50" cy="46" r="23" fill="#fed7aa" />
+                <path d="M27 40 C 27 18, 73 18, 73 40 C 70 28, 48 24, 30 36 Z" fill="#18181b" />
+                <rect x="32" y="39" width="15" height="12" rx="4" fill="rgba(255,255,255,0.6)" stroke="#18181b" strokeWidth="2.6" />
+                <rect x="53" y="39" width="15" height="12" rx="4" fill="rgba(255,255,255,0.6)" stroke="#18181b" strokeWidth="2.6" />
+                {isSlapped ? (
+                  <g stroke="#dc2626" strokeWidth="3">
+                    <line x1="34" y1="41" x2="44" y2="49" /><line x1="34" y1="49" x2="44" y2="41" />
+                    <line x1="56" y1="41" x2="66" y2="49" /><line x1="56" y1="49" x2="66" y2="41" />
+                  </g>
+                ) : (
+                  <g fill="#18181b"><circle cx="39.5" cy="45" r="2.8" /><circle cx="60.5" cy="45" r="2.8" /></g>
+                )}
+                <path d="M 33 58 C 36 53, 48 53, 50 56 C 52 53, 64 53, 67 58 C 65 62, 54 60, 50 58 C 46 60, 35 62, 33 58 Z" fill="#18181b" />
+                {isSlapped && <ellipse cx="64" cy="50" rx="8" ry="7" fill="#ef4444" opacity="0.8" />}
+              </g>
+            )}
+            {preset === '2' && (
+              <g>
+                <path d="M18 92 C 22 72, 78 72, 82 92 Z" fill="#3b82f6" />
+                <circle cx="50" cy="48" r="22" fill="#fed7aa" />
+                <path d="M28 42 C 28 22, 72 22, 72 42 Z" fill="#0f172a" />
+                {isSlapped ? (
+                  <g><circle cx="40" cy="47" r="5" fill="#fff" stroke="#b91c1c" strokeWidth="1.5" /><circle cx="60" cy="47" r="5" fill="#fff" stroke="#b91c1c" strokeWidth="1.5" /><circle cx="40" cy="47" r="1.5" fill="#b91c1c" /><circle cx="60" cy="47" r="1.5" fill="#b91c1c" /><ellipse cx="50" cy="62" rx="6" ry="7" fill="#7f1d1d" /></g>
+                ) : (
+                  <g fill="#1e293b"><circle cx="40" cy="47" r="2.5" /><circle cx="60" cy="47" r="2.5" /><path d="M43 57 Q 50 62 57 57" stroke="#ea580c" strokeWidth="2.2" fill="none" /></g>
+                )}
+                {isSlapped && <ellipse cx="35" cy="52" rx="7" ry="6" fill="#ef4444" opacity="0.8" />}
+              </g>
+            )}
+            {preset === '3' && (
+              <g>
+                <path d="M22 45 C 16 75, 26 92, 34 94 L66 94 C 74 92, 84 75, 78 45 Z" fill="#451a03" />
+                <path d="M18 92 C 24 76, 76 76, 82 92 Z" fill="#ec4899" />
+                <circle cx="50" cy="48" r="22" fill="#ffedd5" />
+                <path d="M26 44 C 30 20, 70 20, 74 44 C 64 32, 36 32, 26 44 Z" fill="#451a03" />
+                {isSlapped ? (
+                  <g stroke="#dc2626" strokeWidth="3" fill="none"><path d="M35 43 L44 47 L35 51" /><path d="M65 43 L56 47 L65 51" /><ellipse cx="64" cy="50" rx="8" ry="6" fill="#ef4444" opacity="0.8" /></g>
+                ) : (
+                  <g fill="#1e293b"><ellipse cx="40" cy="46" rx="3" ry="3.5" /><ellipse cx="60" cy="46" rx="3" ry="3.5" /></g>
+                )}
+              </g>
+            )}
+            {preset === '4' && (
+              <g>
+                <path d="M18 92 C 22 75, 78 75, 82 92 Z" fill="#8b5cf6" />
+                <circle cx="50" cy="48" r="22" fill="#fed7aa" />
+                <path d="M26 40 C 26 18, 74 18, 74 40 C 78 58, 70 65, 70 65 L66 48 C 60 30, 40 30, 34 48 L30 65 C 30 65, 22 58, 26 40 Z" fill="#1e1b4b" />
+                {isSlapped ? (
+                  <g stroke="#b91c1c" strokeWidth="2.8"><line x1="35" y1="42" x2="45" y2="50" /><line x1="35" y1="50" x2="45" y2="42" /><line x1="55" y1="42" x2="65" y2="50" /><line x1="55" y1="50" x2="65" y2="42" /><ellipse cx="35" cy="50" rx="7" ry="6" fill="#ef4444" opacity="0.8" /></g>
+                ) : (
+                  <g fill="#1e1b4b"><circle cx="40" cy="46" r="3" /><circle cx="60" cy="46" r="3" /></g>
+                )}
+              </g>
+            )}
+            {preset === '5' && (
+              <g>
+                <path d="M18 92 C 22 74, 78 74, 82 92 Z" fill="#10b981" />
+                <circle cx="50" cy="48" r="22" fill="#fed7aa" />
+                <path d="M34 52 C 34 72, 66 72, 66 52 C 60 62, 40 62, 34 52 Z" fill="#334155" />
+                <path d="M26 38 C 26 22, 74 22, 74 38 Z" fill="#047857" />
+                <path d="M22 38 Q 50 30 78 38 L84 41 Q 50 35 18 41 Z" fill="#065f46" />
+                {isSlapped ? (
+                  <g stroke="#b91c1c" strokeWidth="3"><line x1="35" y1="44" x2="45" y2="52" /><line x1="35" y1="52" x2="45" y2="44" /><line x1="55" y1="44" x2="65" y2="52" /><line x1="55" y1="52" x2="65" y2="44" /><ellipse cx="64" cy="50" rx="7" ry="6" fill="#ef4444" opacity="0.8" /></g>
+                ) : (
+                  <g fill="#0f172a"><circle cx="40" cy="48" r="3" /><circle cx="60" cy="48" r="3" /></g>
+                )}
+              </g>
+            )}
+          </svg>
+        </div>
+      );
+    }
+
+    function Cat({ color, stage }) {
+      const palette = {
+        orange: { fur: '#fb923c', belly: '#ffedd5', stroke: '#7c2d12' },
+        white: { fur: '#ffffff', belly: '#f8fafc', stroke: '#475569' },
+        black: { fur: '#334155', belly: '#475569', stroke: '#0f172a' },
+        grey: { fur: '#94a3b8', belly: '#f1f5f9', stroke: '#334155' },
+        calico: { fur: '#fef3c7', belly: '#ffffff', stroke: '#451a03' }
+      }[color] || { fur: '#fb923c', belly: '#ffedd5', stroke: '#7c2d12' };
+
+      return (
+        <svg viewBox="0 0 100 100" className="w-full h-full">
+          <ellipse cx="50" cy="92" rx={22 + stage * 2.5} ry="4" fill="rgba(0,0,0,0.06)" />
+          <ellipse cx="50" cy={76 - stage * 2} rx={22 + stage * 2.5} ry={16 + stage * 2} fill={palette.fur} stroke={palette.stroke} strokeWidth="1.6" />
+          <ellipse cx="50" cy={78 - stage * 2} rx={14 + stage * 1.5} ry={11 + stage * 1.5} fill={palette.belly} />
+          <path d="M 33 46 L 28 24 L 44 38 Z" fill={palette.fur} stroke={palette.stroke} strokeWidth="1.6" />
+          <path d="M 67 46 L 72 24 L 56 38 Z" fill={palette.fur} stroke={palette.stroke} strokeWidth="1.6" />
+          <circle cx="50" cy={50 - stage * 1.5} r={22 + stage * 1.2} fill={palette.fur} stroke={palette.stroke} strokeWidth="1.6" />
+          <circle cx="42" cy={50 - stage * 1.5} r="4.5" fill="#18181b" />
+          <circle cx="40.5" cy={48.5 - stage * 1.5} r="1.8" fill="#ffffff" />
+          <circle cx="58" cy={50 - stage * 1.5} r="4.5" fill="#18181b" />
+          <circle cx="56.5" cy={48.5 - stage * 1.5} r="1.8" fill="#ffffff" />
+          {stage === 4 && <polygon points="43,24 40,14 45,19 50,12 55,19 60,14 57,24" fill="#facc15" stroke="#a16207" strokeWidth="1.2" />}
+          {stage === 3 && <g><polygon points="44,63 44,69 49,66" fill="#3b82f6" /><polygon points="56,63 56,69 51,66" fill="#3b82f6" /><circle cx="50" cy="66" r="2" fill="#fbbf24" /></g>}
+          {stage === 2 && <circle cx="50" cy="67" r="3.5" fill="#facc15" stroke="#a16207" strokeWidth="1" />}
+        </svg>
+      );
+    }
+
+    function App() {
+      const [friends, setFriends] = useState(() => {
+        const saved = localStorage.getItem('forab_friends');
+        return saved ? JSON.parse(saved) : DEFAULT_FRIENDS;
+      });
+
+      const [kittens, setKittens] = useState(() => {
+        const saved = localStorage.getItem('forab_kittens');
+        return saved ? JSON.parse(saved) : DEFAULT_KITTENS;
+      });
+
+      const [editModal, setEditModal] = useState(null);
+
+      useEffect(() => {
+        localStorage.setItem('forab_friends', JSON.stringify(friends));
+      }, [friends]);
+
+      useEffect(() => {
+        localStorage.setItem('forab_kittens', JSON.stringify(kittens));
+      }, [kittens]);
+
+      const handleSlap = (id) => {
+        const idx = friends.findIndex(f => f.id === id);
+        const tilt = (Math.random() - 0.5) * 32;
+
+        setFriends(prev => prev.map(f => f.id === id ? { ...f, slaps: f.slaps + 1, tilt, slapped: true } : f));
+        setTimeout(() => {
+          setFriends(prev => prev.map(f => f.id === id ? { ...f, slapped: false } : f));
+        }, 250);
+
+        setKittens(prev => prev.map((k, i) => {
+          if (i !== idx) return k;
+          const newFood = k.food + 1;
+          let newStage = 0;
+          if (newFood >= 50) newStage = 4;
+          else if (newFood >= 30) newStage = 3;
+          else if (newFood >= 15) newStage = 2;
+          else if (newFood >= 5) newStage = 1;
+          return { ...k, food: newFood, stage: newStage };
+        }));
+      };
+
+      const handleSaveEdit = (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const name = form.name.value;
+        const photoFile = form.photo.files[0];
+
+        if (photoFile) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            setFriends(prev => prev.map(f => f.id === editModal.id ? { ...f, name, photo: event.target.result } : f));
+            setEditModal(null);
+          };
+          reader.readAsDataURL(photoFile);
+        } else {
+          setFriends(prev => prev.map(f => f.id === editModal.id ? { ...f, name } : f));
+          setEditModal(null);
+        }
+      };
+
+      return (
+        <div className="w-full max-w-6xl bg-amber-50/90 border-4 border-amber-900/40 p-4 sm:p-8 rounded-3xl shadow-2xl">
+          {/* Sadece FORAB TOKATLAMA Başlığı */}
+          <div className="text-center pb-6 border-b-2 border-amber-900/20">
+            <h1 className="text-3xl sm:text-5xl font-black font-poster tracking-wider text-stone-900 uppercase">
+              FORAB TOKATLAMA
+            </h1>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 mt-6">
+            {friends.map((friend, idx) => {
+              const kitten = kittens[idx];
+              return (
+                <div key={friend.id} className="relative flex flex-col items-center bg-white border border-stone-200 p-3 rounded-2xl shadow-md hover:shadow-xl transition-all">
+                  
+                  {/* Düzenleme Butonu (İsim ve Fotoğraf) */}
+                  <button
+                    onClick={() => setEditModal(friend)}
+                    className="absolute top-2 right-2 text-stone-400 hover:text-stone-700 bg-stone-100 hover:bg-amber-100 p-1.5 rounded-full border border-stone-200 text-xs shadow-sm transition-colors"
+                    title="İsim ve Fotoğraf Düzenle"
+                  >
+                    ✏️
+                  </button>
+
+                  <span className="text-[11px] font-black text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full mb-2">
+                    🔥 {friend.slaps} Tokat
+                  </span>
+
+                  {/* İnsan Kartı */}
+                  <div
+                    onClick={() => handleSlap(friend.id)}
+                    className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-2xl p-1 bg-stone-50 border-2 border-stone-200 hover:border-amber-400 cursor-pointer group"
+                  >
+                    <Avatar preset={friend.preset} photo={friend.photo} isSlapped={friend.slapped} tilt={friend.tilt} />
+                    <div className="absolute inset-0 bg-rose-500/0 group-hover:bg-rose-500/10 rounded-2xl flex items-center justify-center pointer-events-none">
+                      <span className="opacity-0 group-hover:opacity-100 font-extrabold text-white text-xs bg-rose-600 px-2 py-0.5 rounded-full shadow">TOKATLA! 💥</span>
+                    </div>
+                  </div>
+
+                  <h3 className="mt-2 font-fredoka font-bold text-stone-800 text-base">{friend.name}</h3>
+
+                  <button
+                    onClick={() => handleSlap(friend.id)}
+                    className="mt-1.5 w-full py-1.5 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-extrabold text-xs rounded-xl shadow active:scale-95 transition-transform"
+                  >
+                    🖐️ Tokatla
+                  </button>
+
+                  <div className="w-full h-px bg-stone-100 my-3" />
+
+                  {/* Kedi Kartı */}
+                  <div className="w-full flex flex-col items-center bg-stone-50/80 rounded-xl p-2 border border-stone-100">
+                    <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl p-1 bg-white border border-stone-200">
+                      <Cat color={kitten.color} stage={kitten.stage} />
+                    </div>
+                    <span className="mt-1.5 text-[10px] font-black text-amber-950 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full text-center">
+                      {STAGES[kitten.stage].badge}
+                    </span>
+                    <span className="text-[11px] text-stone-500 font-semibold mt-1">🥣 {kitten.food} Mama</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* İsim & Fotoğraf Düzenleme Modalı */}
+          {editModal && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-stone-200">
+                <h3 className="text-lg font-bold text-stone-800 mb-4">Kişiyi Düzenle</h3>
+                <form onSubmit={handleSaveEdit} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-stone-600 mb-1">İsim</label>
+                    <input
+                      name="name"
+                      defaultValue={editModal.name}
+                      required
+                      className="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm font-semibold focus:outline-hidden focus:border-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-stone-600 mb-1">Fotoğraf Yükle (İsteğe Bağlı)</label>
+                    <input
+                      type="file"
+                      name="photo"
+                      accept="image/*"
+                      className="w-full text-xs text-stone-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-100 file:text-amber-900 hover:file:bg-amber-200"
+                    />
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setEditModal(null)}
+                      className="flex-1 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold rounded-xl"
+                    >
+                      İptal
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl shadow"
+                    >
+                      Kaydet
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
